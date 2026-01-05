@@ -16,7 +16,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
-        python-version: '3.9'
+        python-version: '3.13'
     
     - name: Install ruff
       run: |
@@ -30,3 +30,33 @@ jobs:
     - name: Run ruff format check
       run: |
         ruff format --check .
+
+  test:
+    runs-on: ubuntu-latest
+    name: Test inventory plugin
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.13'
+    
+    - name: Install uv
+      run: |
+        curl -LsSf https://astral.sh/uv/install.sh | sh
+        echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+    
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y ansible
+    
+    - name: Install collection
+      run: |
+        make build
+        ansible-galaxy collection install -p ~/.ansible/collections/ --force tokuhirom-sacloud-*.tar.gz
+    
+    - name: Run tests
+      run: |
+        make test
