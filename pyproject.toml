@@ -1,0 +1,24 @@
+[project]
+name = "ansible-collection-inventory-sacloud"
+version = "1.0.0"
+description = "Sacloud dynamic inventory plugin for Ansible"
+requires-python = ">=3.13"
+
+[tool.ruff]
+line-length = 160
+target-version = "py313"
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+]
+ignore = [
+    "E501",  # line too long, handled by black
+    "E402",  # module level import not at top of file
+]
+
+[tool.ruff.format]
+line-ending = "lf"

@@ -1,0 +1,15 @@
+namespace: tokuhirom
+name: sacloud
+version: 1.0.0
+description: Sacloud dynamic inventory plugin for Ansible
+authors:
+  - Tokuhiro Matsuno <tokuhirom@gmail.com>
+readme: README.md
+license: MIT
+tags:
+  - inventory
+  - sacloud
+  - dynamic
+repository: https://github.com/tokuhirom/ansible-collection-inventory-sacloud
+homepage: https://github.com/tokuhirom/ansible-collection-inventory-sacloud
+dependencies: {}
