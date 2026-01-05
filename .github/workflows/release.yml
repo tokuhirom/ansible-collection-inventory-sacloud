@@ -1,27 +1,60 @@
-name: release
+name: Release
 
 on:
-  # Run when a release is published (not when tag is created)
-  release:
-    types: [published]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Release version (e.g., v0.0.2)'
+        required: true
+        default: 'v0.0.2'
 
 jobs:
-  upload-artifacts:
+  release:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
       
       - name: Set up Python
         uses: actions/setup-python@7f4fc3e22c37d6ff65e88745f38bd3157c663f7c # v4
         with:
           python-version: '3.13'
       
-      - name: Install dependencies
+      - name: Install uv
         run: |
           curl -LsSf https://astral.sh/uv/install.sh | sh
           echo "$HOME/.cargo/bin" >> $GITHUB_PATH
-          make build
       
+      - name: Update version in galaxy.yml
+        run: |
+          # Remove 'v' prefix for version in galaxy.yml
+          WITHOUT_V="${{ github.event.inputs.version }}"
+          WITHOUT_V="${WITHOUT_V#v}"
+          sed -i.bak "s/version: .*/version: \"$WITHOUT_V\"/" galaxy.yml
+          rm galaxy.yml.bak
+          
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add galaxy.yml
+          git commit -m "Bump version to $WITHOUT_V"
+          git push origin main
+      
+      - name: Create tag and release
+        uses: softprops/action-gh-release@de2c0eb89ae2a093876385947365aca7b0e5f844 # v1
+        with:
+          tag_name: ${{ github.event.inputs.version }}
+          name: Release ${{ github.event.inputs.version }}
+          generate_release_notes: true
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Build and upload artifacts
+        run: |
+          make build
       - name: Upload Release Assets
         uses: softprops/action-gh-release@de2c0eb89ae2a093876385947365aca7b0e5f844 # v1
         with:
