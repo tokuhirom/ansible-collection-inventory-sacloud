@@ -1,6 +1,6 @@
 # Test inventory with constructed features
 plugin: tokuhirom.sacloud.sacloud
-url: "http://localhost:8765"
+# url will be set via SAKURA_API_ROOT_URL environment variable
 access_token: "test_token"
 access_token_secret: "test_secret"
 zones:

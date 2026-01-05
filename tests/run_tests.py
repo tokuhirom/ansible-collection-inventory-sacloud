@@ -4,7 +4,9 @@ Test runner for sacloud inventory plugin.
 """
 
 import json
+import os
 import signal
+import socketserver
 import subprocess
 import sys
 import threading
@@ -17,20 +19,24 @@ from mock_server import MockSakuraAPIHandler
 class InventoryTester:
     """Test runner for inventory plugin."""
 
-    def __init__(self, port=8765):
-        self.port = port
+    def __init__(self):
+        self.port = None
         self.server_thread = None
         self.mock_server = None
         self.test_dir = Path(__file__).parent
 
     def start_mock_server(self):
         """Start mock server in background."""
-        import socketserver
 
         def create_handler(*args, **kwargs):
             MockSakuraAPIHandler(*args, **kwargs)
 
-        self.mock_server = socketserver.TCPServer(("", self.port), create_handler)
+        # Use port 0 to get automatically assigned port
+        self.mock_server = socketserver.TCPServer(("", 0), create_handler)
+        self.port = self.mock_server.server_address[1]
+
+        # Set environment variable for inventory configs
+        os.environ["SAKURA_API_ROOT_URL"] = f"http://localhost:{self.port}"
 
         # Start server in background thread
         self.server_thread = threading.Thread(target=self.mock_server.serve_forever)
@@ -40,6 +46,7 @@ class InventoryTester:
         # Give server time to start
         time.sleep(0.5)
         print(f"Mock server started on port {self.port}")
+        print(f"SAKURA_API_ROOT_URL={os.environ['SAKURA_API_ROOT_URL']}")
 
     def stop_mock_server(self):
         """Stop mock server."""
@@ -48,23 +55,45 @@ class InventoryTester:
             self.mock_server.server_close()
             if self.server_thread:
                 self.server_thread.join(timeout=1)
+        # Clean up environment variable
+        if "SAKURA_API_ROOT_URL" in os.environ:
+            del os.environ["SAKURA_API_ROOT_URL"]
 
     def run_inventory_command(self, inventory_file):
         """Run ansible-inventory command and return JSON output."""
-        cmd = ["ansible-inventory", "-i", str(inventory_file), "--list"]
+        cmd = [
+            "ansible-inventory",
+            "-i",
+            str(inventory_file),
+            "--list",
+        ]
 
         try:
-            result = subprocess.run(cmd, cwd=self.test_dir.parent, capture_output=True, text=True, timeout=30)
+            result = subprocess.run(
+                cmd,
+                cwd=self.test_dir.parent,
+                capture_output=True,
+                text=True,
+                timeout=30,
+            )
 
             if result.returncode != 0:
-                return {"success": False, "error": result.stderr, "returncode": result.returncode}
+                return {
+                    "success": False,
+                    "error": result.stderr,
+                    "returncode": result.returncode,
+                }
 
             return {"success": True, "data": json.loads(result.stdout)}
 
         except subprocess.TimeoutExpired:
             return {"success": False, "error": "Command timed out"}
         except json.JSONDecodeError as e:
-            return {"success": False, "error": f"Failed to parse JSON: {e}", "raw_output": result.stdout if "result" in locals() else ""}
+            return {
+                "success": False,
+                "error": f"Failed to parse JSON: {e}",
+                "raw_output": result.stdout if "result" in locals() else "",
+            }
         except Exception as e:
             return {"success": False, "error": f"Unexpected error: {e}"}
 
@@ -82,7 +111,12 @@ class InventoryTester:
         data = result["data"]
 
         # Check expected hosts
-        expected_hosts = {"web-server-01", "db-server-01", "test-instance", "fumidai.test-server"}
+        expected_hosts = {
+            "web-server-01",
+            "db-server-01",
+            "test-instance",
+            "fumidai.test-server",
+        }
         actual_hosts = set(data.get("_meta", {}).get("hostvars", {}).keys())
 
         if not expected_hosts.issubset(actual_hosts):
@@ -159,7 +193,12 @@ class InventoryTester:
         hosts = set(data.get("_meta", {}).get("hostvars", {}).keys())
 
         # Should have servers from tk1b
-        expected_hosts = {"web-server-01", "db-server-01", "test-instance", "fumidai.test-server"}
+        expected_hosts = {
+            "web-server-01",
+            "db-server-01",
+            "test-instance",
+            "fumidai.test-server",
+        }
         if hosts != expected_hosts:
             print(f"❌ Empty zones hosts incorrect: got {hosts}, expected {expected_hosts}")
             return False
@@ -174,7 +213,11 @@ class InventoryTester:
         try:
             self.start_mock_server()
 
-            tests = [self.test_basic_inventory, self.test_constructed_inventory, self.test_error_cases]
+            tests = [
+                self.test_basic_inventory,
+                self.test_constructed_inventory,
+                self.test_error_cases,
+            ]
 
             passed = 0
             total = len(tests)

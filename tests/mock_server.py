@@ -54,21 +54,32 @@ class MockSakuraAPIHandler(http.server.BaseHTTPRequestHandler):
         print(f"[MOCK] {self.address_string()} - {format % args}")
 
 
-def start_mock_server(port=8765):
-    """Start the mock HTTP server."""
+def start_mock_server(port=None):
+    """Start the mock HTTP server and return the actual port used."""
 
     def create_handler(*args, **kwargs):
         MockSakuraAPIHandler(*args, **kwargs)
 
+    # Use port 0 to get automatically assigned port
+    if port is None:
+        port = 0
+
     with socketserver.TCPServer(("", port), create_handler) as httpd:
-        print(f"Mock server started on port {port}")
-        print(f"Test URL: http://localhost:{port}")
-        httpd.serve_forever()
+        actual_port = httpd.server_address[1]
+        print(f"Mock server started on port {actual_port}")
+        print(f"Test URL: http://localhost:{actual_port}")
+        return httpd, actual_port
+
+
+def run_mock_server(port=None):
+    """Run mock server forever and return port."""
+    httpd, actual_port = start_mock_server(port)
+    httpd.serve_forever()
 
 
 if __name__ == "__main__":
-    port = 8765
+    port = None
     if len(sys.argv) > 1:
         port = int(sys.argv[1])
 
-    start_mock_server(port)
+    run_mock_server(port)
