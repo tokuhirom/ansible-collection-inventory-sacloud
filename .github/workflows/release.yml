@@ -1,12 +1,12 @@
 name: release
 
 on:
-  push:
-    tags:
-      - "v*"
+  # Run when a release is published (not when tag is created)
+  release:
+    types: [published]
 
 jobs:
-  build-and-release:
+  upload-artifacts:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
@@ -22,13 +22,9 @@ jobs:
           echo "$HOME/.cargo/bin" >> $GITHUB_PATH
           make build
       
-      - name: Create Release
+      - name: Upload Release Assets
         uses: softprops/action-gh-release@de2c0eb89ae2a093876385947365aca7b0e5f844 # v1
         with:
           files: tokuhirom-sacloud-*.tar.gz
-          generate_release_notes: true
-          name: Release ${{ github.ref_name }}
-          draft: false
-          prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
