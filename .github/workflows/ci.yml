@@ -52,10 +52,11 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y ansible
     
-    - name: Install collection
+    - name: Install dependencies
       run: |
         make build
         ansible-galaxy collection install -p ~/.ansible/collections/ --force tokuhirom-sacloud-*.tar.gz
+        uv tool install pytest
     
     - name: Run tests
       run: |

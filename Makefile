@@ -4,6 +4,7 @@
 help:
 	@echo "Available targets:"
 	@echo "  test          - Run all tests"
+	@echo "  test-verbose  - Run tests with verbose output"
 	@echo "  build         - Build the collection"
 	@echo "  clean         - Clean build artifacts"
 	@echo "  lint          - Run ruff checks"
@@ -17,6 +18,7 @@ build:
 clean:
 	rm -f *.tar.gz
 	rm -rf tests/__pycache__/
+	rm -rf .pytest_cache/
 
 # Run linting
 lint:
@@ -29,4 +31,8 @@ format:
 
 # Run tests
 test:
-	cd tests && python3 run_tests.py
+	uv run pytest tests/ -v
+
+# Run tests with more verbose output
+test-verbose:
+	uv run pytest tests/ -vvv
