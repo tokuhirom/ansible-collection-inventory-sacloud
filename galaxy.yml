@@ -1,6 +1,7 @@
+#SPDX-License-Identifier: MIT-0
 namespace: tokuhirom
 name: sacloud
-version: 1.0.0
+version: 0.0.1
 description: Sacloud dynamic inventory plugin for Ansible
 authors:
   - Tokuhiro Matsuno <tokuhirom@gmail.com>
@@ -13,3 +14,5 @@ tags:
 repository: https://github.com/tokuhirom/ansible-collection-inventory-sacloud
 homepage: https://github.com/tokuhirom/ansible-collection-inventory-sacloud
 dependencies: {}
+build_ignore: []
+license_file: LICENSE
