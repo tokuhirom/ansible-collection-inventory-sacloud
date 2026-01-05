@@ -10,37 +10,56 @@ This is an Ansible Collection that provides a dynamic inventory plugin for Sakur
 ```
 /
 ├── README.md                 # Project documentation (in Japanese)
+├── LICENSE                   # MIT License file
 ├── galaxy.yml               # Ansible Galaxy collection metadata
+├── Makefile                 # Build, test, and development commands
+├── AGENTS.md                # This file
+├── pyproject.toml           # Python project configuration (ruff, Python 3.13+)
+├── .github/
+│   ├── workflows/
+│   │   ├── ci.yml          # GitHub Actions CI (lint tests)
+│   │   ├── release.yml     # Automated releases via tagpr
+│   │   └── tagpr.yml       # tagpr configuration
 └── plugins/
     └── inventory/
         └── sacloud.py       # Main inventory plugin implementation
+└── tests/
+    ├── conftest.py          # pytest fixtures for testing
+    ├── test_inventory.py    # pytest-based test suite
+    ├── mock_server.py       # Mock HTTP server for API simulation
+    ├── test_inventory_basic_sacloud.yml      # Basic test config
+    ├── test_inventory_constructed_sacloud.yml # Constructed features test
+    ├── test_inventory_empty_sacloud.yml      # Single zone test
+    └── data/
+        └── mock_api_response.json            # Test data
 ```
 
 ## Essential Commands
 
 ### Build and Package
 ```bash
+make build
+# or
 ansible-galaxy collection build
 ```
 Builds the collection into a tarball for distribution.
 
-### Installation (for development)
+### Testing
 ```bash
-ansible-galaxy collection install git+https://github.com/tokuhirom/ansible-collection-inventory-sacloud.git
+make test          # Run pytest-based test suite
+make test-verbose  # Run tests with detailed output
 ```
 
-### Testing the Plugin
+### Code Quality
 ```bash
-# Test inventory generation (requires valid API credentials)
-ansible-inventory -i inventory.yml --list
+make lint          # Run ruff checks
+make format        # Auto-format code with ruff
+```
 
-# Where inventory.yml contains:
-# plugin: tokuhirom.sacloud.sacloud
-# access_token: <your_token>
-# access_token_secret: <your_secret>
-# zones:
-#   - tk1b
-#   - is1a
+### Local Development Installation
+```bash
+make build
+ansible-galaxy collection install -p ~/.ansible/collections/ --force tokuhirom-sacloud-*.tar.gz
 ```
 
 ## Code Patterns and Conventions
@@ -49,11 +68,13 @@ ansible-inventory -i inventory.yml --list
 - The plugin inherits from `BaseInventoryPlugin` and `Constructable`
 - Uses Ansible's plugin documentation format with `DOCUMENTATION` and `EXAMPLES` constants
 - Follows Ansible naming conventions: `InventoryModule` class with `NAME = 'sacloud'`
+- File names MUST end with `sacloud.yml` or `sacloud.yaml` for `verify_file()` recognition
 
 ### API Integration
 - Uses `ansible.module_utils.urls.open_url` for HTTP requests
 - Implements Sakura Cloud API authentication with username/password (token/secret)
 - API endpoint pattern: `{api_root}/{zone}/api/cloud/1.1/server`
+- Handles pagination with `{From:0,To:0}` parameter
 
 ### Inventory Processing
 1. Verify file with `verify_file()` - only accepts files ending in `sacloud.yml` or `sacloud.yaml`
@@ -94,6 +115,38 @@ The collection is defined in `galaxy.yml`:
 - License: MIT
 - Tags: inventory, sacloud, dynamic
 
+## Development
+
+### Tools and Dependencies
+- **Python 3.13+** (required)
+- **uv** - Python package manager (preferred)
+- **pytest** - Test framework
+- **ruff** - Linting and formatting
+- **Ansible 2.9+** - Runtime requirement
+
+### Testing Strategy
+- **pytest-based** test suite with fixtures
+- **Mock HTTP server** simulates Sakura Cloud API
+- **Dynamic port allocation** prevents conflicts
+- **Environment variable support** for flexible configuration in tests
+
+### Test Structure
+- `conftest.py`: pytest fixtures (`mock_server`, `run_inventory`)
+- `test_inventory.py`: Main test suite (6 tests covering basic, constructed, and edge cases)
+- `mock_server.py`: HTTP server that serves mock API responses
+- Test configurations use environment variables (`SAKURA_API_ROOT_URL`)
+
+### Code Quality standards
+- **ruff** for linting and formatting
+- **MIT license** - all code must be MIT compatible
+- **Standard Ansible patterns** for plugin development
+
+### Release Process
+- **tagpr** - Automated releases from feature branches
+- **GitHub Actions** for CI/CD
+- **Semantic versioning** with `v` prefix
+- **Automated changelogs** from commit messages
+
 ## Gotchas and Important Notes
 
 ### File Naming
@@ -118,15 +171,38 @@ The collection is defined in `galaxy.yml`:
 - Can compose new variables, create conditional groups, and keyed groups
 - Host variables are available for constructed expression evaluation
 
-## Dependencies
+### Testing Gotchas
+- Tests use **dynamic port allocation** (port 0) - don't assume fixed ports
+- Tests set/read **environment variables** (`SAKURA_API_ROOT_URL`)
+- **Cached test results** may interfere - clear `~/.ansible/collections/` if needed
+- **pytest fixtures** handle setup/teardown automatically
 
-- Python 3.8+
-- Ansible 2.9+
-- Valid Sakura Cloud API credentials
+### Development Environment
+- **uv tool** recommended: `uv tool install pytest ruff`
+- **Makefile** provides consistent commands across environments
+- **Python 3.13** minimum - enforced by `pyproject.toml`
 
-## Development Notes
+## CI/CD and Automation
 
-- The plugin is written in a single file (`sacloud.py`)
-- No external dependencies beyond Ansible standard library
-- No test suite currently present in the repository
-- No linting configuration files (tox.ini, etc.) present
+### GitHub Actions
+- **ci.yml**: Lint checks and test execution
+- **release.yml**: Tag-based automatic releases
+- **tagpr.yml**: Automated release creation from PRs
+
+### tagpr Integration
+- Feature branches create release candidates
+- Automatic version detection and tag creation
+- Release notes generation from commits
+
+## Support and Contributing
+
+### Issue Reporting
+- Check existing issues before creating new ones
+- Include configuration examples when reporting bugs
+- Provide test inventory files that reproduce issues
+
+### Contributing
+- Follow existing code style (enforced by ruff)
+- Add tests for new functionality
+- Update documentation (AGENTS.md, README.md)
+- Use semantic versioning for changes
