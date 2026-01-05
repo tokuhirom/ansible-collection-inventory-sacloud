@@ -21,3 +21,4 @@ wheels/
 *.egg
 .venv
 *.tar.gz
+BLOG_POST.md

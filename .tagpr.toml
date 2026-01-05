@@ -1,0 +1,11 @@
+[vcs]
+type = "github"
+
+[github]
+owner = "tokuhirom"
+repo = "ansible-collection-inventory-sacloud"
+
+[tag]
+prefix = "v"
+
+[release]
