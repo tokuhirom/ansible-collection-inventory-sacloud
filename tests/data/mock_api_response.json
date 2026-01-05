@@ -1,0 +1,52 @@
+{
+  "Servers": [
+    {
+      "Name": "web-server-01",
+      "Interfaces": [
+        {
+          "IPAddress": "192.168.0.101",
+          "UserIPAddress": "203.0.113.101"
+        },
+        {
+          "IPAddress": "192.168.1.101",
+          "UserIPAddress": "203.0.113.201"
+        }
+      ],
+      "Tags": ["web", "production", "@auto-reboot"]
+    },
+    {
+      "Name": "db-server-01", 
+      "Interfaces": [
+        {
+          "IPAddress": "192.168.0.102",
+          "UserIPAddress": "203.0.113.102"
+        }
+      ],
+      "Tags": ["database", "production"]
+    },
+    {
+      "Name": "test-instance",
+      "Interfaces": [
+        {
+          "IPAddress": "192.168.0.103",
+          "UserIPAddress": "203.0.113.103"
+        }
+      ],
+      "Tags": ["test", "__with_sacloud_inventory"]
+    },
+    {
+      "Name": "fumidai.test-server",
+      "Interfaces": [
+        {
+          "IPAddress": "192.168.0.104",
+          "UserIPAddress": "203.0.113.104"
+        },
+        {
+          "IPAddress": "192.168.1.104",
+          "UserIPAddress": "203.0.113.204"
+        }
+      ],
+      "Tags": ["test", "monitoring"]
+    }
+  ]
+}

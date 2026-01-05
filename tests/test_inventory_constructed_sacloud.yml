@@ -1,0 +1,17 @@
+# Test inventory with constructed features
+plugin: tokuhirom.sacloud.sacloud
+url: "http://localhost:8765"
+access_token: "test_token"
+access_token_secret: "test_secret"
+zones:
+  - tk1b
+skip_group_tags:
+  - "@auto-reboot"
+  - "__with_sacloud_inventory"
+compose:
+  ansible_host: user_ip_address[0] if inventory_hostname.startswith('fumidai.') else user_ip_address[1] if len(user_ip_address) > 1 else user_ip_address[0]
+groups:
+  production_hosts: "'production' in group_names"
+keyed_groups:
+  - prefix: os_type
+    key: user_ip_address

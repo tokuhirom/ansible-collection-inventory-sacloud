@@ -1,0 +1,7 @@
+
+plugin: tokuhirom.sacloud.sacloud
+url: "http://localhost:8765"
+access_token: "test_token"
+access_token_secret: "test_secret"
+zones:
+  - tk1b
