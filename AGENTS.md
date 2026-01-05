@@ -18,8 +18,7 @@ This is an Ansible Collection that provides a dynamic inventory plugin for Sakur
 ├── .github/
 │   ├── workflows/
 │   │   ├── ci.yml          # GitHub Actions CI (lint tests)
-│   │   ├── release.yml     # Automated releases via tagpr
-│   │   └── tagpr.yml       # tagpr configuration
+│   │   └── release.yml     # Manual release workflow (workflow_dispatch)
 └── plugins/
     └── inventory/
         └── sacloud.py       # Main inventory plugin implementation
@@ -142,10 +141,41 @@ The collection is defined in `galaxy.yml`:
 - **Standard Ansible patterns** for plugin development
 
 ### Release Process
-- **tagpr** - Automated releases from feature branches
+- **Manual workflow dispatch** - Releases are triggered manually via GitHub Actions
+- **Semantic versioning** with `v` prefix (e.g., v0.0.2, v1.0.0)
 - **GitHub Actions** for CI/CD
-- **Semantic versioning** with `v` prefix
-- **Automated changelogs** from commit messages
+- **Automated release notes** generated from commits
+
+#### How to Release
+
+1. **Navigate to Actions tab** on GitHub
+   - Go to: https://github.com/tokuhirom/ansible-collection-inventory-sacloud/actions
+
+2. **Select the Release workflow**
+   - Click on "Release" workflow in the left sidebar
+
+3. **Trigger workflow manually**
+   - Click "Run workflow" button
+   - Enter the version number in semver format with `v` prefix (e.g., `v0.0.2`, `v1.0.0`)
+   - Click "Run workflow" to start
+
+4. **The workflow will automatically:**
+   - Update the version in `galaxy.yml` (removes `v` prefix)
+   - Commit the version change to main branch
+   - Create a git tag with the specified version
+   - Create a GitHub release with auto-generated release notes
+   - Build the collection tarball (`tokuhirom-sacloud-*.tar.gz`)
+   - Upload the tarball as a release asset
+
+5. **Verify the release**
+   - Check the Releases page: https://github.com/tokuhirom/ansible-collection-inventory-sacloud/releases
+   - Confirm the tarball is attached to the release
+   - Verify the version in `galaxy.yml` matches (without `v` prefix)
+
+#### Version Format
+- Use semantic versioning: `MAJOR.MINOR.PATCH`
+- Always include `v` prefix when triggering the workflow: `v1.0.0`
+- The `galaxy.yml` file will store the version without `v` prefix: `1.0.0`
 
 ## Gotchas and Important Notes
 
@@ -185,14 +215,12 @@ The collection is defined in `galaxy.yml`:
 ## CI/CD and Automation
 
 ### GitHub Actions
-- **ci.yml**: Lint checks and test execution
-- **release.yml**: Tag-based automatic releases
-- **tagpr.yml**: Automated release creation from PRs
-
-### tagpr Integration
-- Feature branches create release candidates
-- Automatic version detection and tag creation
-- Release notes generation from commits
+- **ci.yml**: Lint checks and test execution on pull requests
+- **release.yml**: Manual release workflow triggered via workflow_dispatch
+  - Accepts version input (e.g., `v0.0.2`)
+  - Updates `galaxy.yml` version
+  - Creates git tag and GitHub release
+  - Builds and uploads collection tarball
 
 ## Support and Contributing
 
