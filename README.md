@@ -91,6 +91,7 @@ compose:
 利用可能なホスト変数:
 - `ip_address`: インターフェースのIPアドレスのリスト
 - `user_ip_address`: ユーザーIPアドレスのリスト
+- `zone`: サーバーが存在するゾーン（例: "tk1b", "is1a"）
 - `inventory_hostname`: ホスト名（サーバー名）
 
 #### `groups`
