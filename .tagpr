@@ -1,0 +1,18 @@
+# tagpr configuration
+# See: https://github.com/Songmu/tagpr
+
+[tagpr]
+  # Version file to track
+  versionFile = "galaxy.yml"
+
+  # Version format in galaxy.yml (YAML field)
+  vPrefix = true
+
+  # Changelog file (optional)
+  changelog = true
+
+  # Release command to run after tag is created
+  command = "make build"
+
+  # Release branch (default: main)
+  releaseBranch = "main"

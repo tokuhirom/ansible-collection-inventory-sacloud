@@ -15,11 +15,12 @@ This is an Ansible Collection that provides a dynamic inventory plugin for Sakur
 ├── Makefile                 # Build, test, and development commands
 ├── AGENTS.md                # This file
 ├── pyproject.toml           # Python project configuration (ruff, Python 3.13+)
+├── .tagpr                   # tagpr configuration file
 ├── .github/
 │   ├── workflows/
 │   │   ├── ci.yml          # GitHub Actions CI (lint tests)
-│   │   ├── release.yml     # Automated releases via tagpr
-│   │   └── tagpr.yml       # tagpr configuration
+│   │   ├── release.yml     # Release workflow (triggers on tag push)
+│   │   └── tagpr.yml       # tagpr workflow (creates release PRs)
 └── plugins/
     └── inventory/
         └── sacloud.py       # Main inventory plugin implementation
@@ -142,10 +143,48 @@ The collection is defined in `galaxy.yml`:
 - **Standard Ansible patterns** for plugin development
 
 ### Release Process
-- **tagpr** - Automated releases from feature branches
+- **tagpr** - Automated release PR creation and version management
 - **GitHub Actions** for CI/CD
 - **Semantic versioning** with `v` prefix
 - **Automated changelogs** from commit messages
+
+#### How to Release with tagpr
+
+1. **Update version in galaxy.yml**
+   ```bash
+   # Edit galaxy.yml and bump the version
+   # Example: version: "0.0.5" → version: "0.0.6"
+   ```
+
+2. **Commit and push to main**
+   ```bash
+   git add galaxy.yml
+   git commit -m "Bump version to 0.0.6"
+   git push origin main
+   ```
+
+3. **tagpr automatically creates a release PR**
+   - The tagpr workflow detects the version change
+   - Creates a PR titled "Release v0.0.6" (or similar)
+   - Generates changelog from commit messages
+   - PR includes all changes since last release
+
+4. **Review and merge the release PR**
+   - Review the changelog and changes
+   - Merge the PR (can use auto-merge if configured)
+
+5. **Tag and release are created automatically**
+   - When the PR is merged, tagpr automatically:
+     - Creates a git tag (e.g., `v0.0.6`)
+     - The tag push triggers the release workflow
+     - Release workflow builds the collection tarball
+     - Uploads the tarball to GitHub Releases
+
+#### Version Management
+- Version is tracked in `galaxy.yml`
+- Use semantic versioning: `MAJOR.MINOR.PATCH`
+- Version in galaxy.yml should NOT have `v` prefix (e.g., `"0.0.6"`)
+- Git tags will have `v` prefix (e.g., `v0.0.6`)
 
 ## Gotchas and Important Notes
 
@@ -185,14 +224,17 @@ The collection is defined in `galaxy.yml`:
 ## CI/CD and Automation
 
 ### GitHub Actions
-- **ci.yml**: Lint checks and test execution
-- **release.yml**: Tag-based automatic releases
-- **tagpr.yml**: Automated release creation from PRs
-
-### tagpr Integration
-- Feature branches create release candidates
-- Automatic version detection and tag creation
-- Release notes generation from commits
+- **ci.yml**: Lint checks and test execution on pull requests
+- **tagpr.yml**: Monitors version changes and creates release PRs
+  - Triggers on push to main branch
+  - Detects version bump in galaxy.yml
+  - Creates release PR with changelog
+  - Creates git tag when PR is merged
+- **release.yml**: Builds and publishes releases
+  - Triggers on tag push (from tagpr)
+  - Builds collection tarball with `make build`
+  - Uploads tarball to GitHub Releases
+  - Generates release notes automatically
 
 ## Support and Contributing
 
