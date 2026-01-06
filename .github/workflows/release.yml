@@ -29,17 +29,23 @@ jobs:
           curl -LsSf https://astral.sh/uv/install.sh | sh
           echo "$HOME/.cargo/bin" >> $GITHUB_PATH
       
-      - name: Update version in galaxy.yml
+      - name: Update version in galaxy.yml and README.md
         run: |
           # Remove 'v' prefix for version in galaxy.yml
-          WITHOUT_V="${{ github.event.inputs.version }}"
-          WITHOUT_V="${WITHOUT_V#v}"
+          WITH_V="${{ github.event.inputs.version }}"
+          WITHOUT_V="${WITH_V#v}"
+
+          # Update galaxy.yml
           sed -i.bak "s/version: .*/version: \"$WITHOUT_V\"/" galaxy.yml
           rm galaxy.yml.bak
-          
+
+          # Update README.md - replace version in the release download URL
+          sed -i.bak "s|releases/download/v[0-9]*\.[0-9]*\.[0-9]*/tokuhirom-sacloud-[0-9]*\.[0-9]*\.[0-9]*\.tar\.gz|releases/download/${WITH_V}/tokuhirom-sacloud-${WITHOUT_V}.tar.gz|" README.md
+          rm README.md.bak
+
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add galaxy.yml
+          git add galaxy.yml README.md
           git commit -m "Bump version to $WITHOUT_V"
           git push origin main
       
