@@ -152,38 +152,35 @@ The collection is defined in `galaxy.yml`:
 
 #### How to Release with tagpr
 
-1. **Update version in galaxy.yml**
+1. **Develop normally and push commits to main**
    ```bash
-   # Edit galaxy.yml and bump the version
-   # Example: version: "0.0.5" → version: "0.0.6"
-   ```
-
-2. **Commit and push to main**
-   ```bash
-   git add galaxy.yml
-   git commit -m "Bump version to 0.0.6"
+   # Just develop features, fix bugs, etc. and push to main as usual
+   git commit -m "Add new feature"
    git push origin main
    ```
 
-3. **tagpr automatically creates a release PR**
-   - The tagpr workflow detects the version change
-   - Runs `scripts/update-version.sh` to update:
-     - `galaxy.yml` version
-     - `README.md` download URL with new version
-   - Creates a PR titled "Release v0.0.6" (or similar)
-   - Generates changelog from commit messages
-   - PR includes all version updates and changes since last release
+2. **tagpr automatically creates a release PR**
+   - tagpr workflow runs on every push to main
+   - Detects unreleased commits since the last tag
+   - Automatically creates a release PR that includes:
+     - Version bump (runs `scripts/update-version.sh`)
+     - Updates `galaxy.yml` and `README.md` with next version
+     - Generated changelog from commit messages
+     - All changes since last release
 
-4. **Review and merge the release PR**
-   - Review the changelog and version updates
+3. **Review and merge the release PR**
+   - Review the changelog and version bump
+   - Confirm the changes look correct
    - Merge the PR (can use auto-merge if configured)
 
-5. **Tag and release are created automatically**
+4. **Tag and release are created automatically**
    - When the PR is merged, tagpr automatically:
      - Creates a git tag (e.g., `v0.0.6`)
      - The tag push triggers the release workflow
      - Release workflow builds the collection tarball
      - Uploads the tarball to GitHub Releases
+
+**Note:** You don't need to manually update version numbers. tagpr handles version bumping automatically based on semantic versioning when creating the release PR.
 
 #### Version Management
 - Version is tracked in `galaxy.yml`
