@@ -111,6 +111,7 @@ class InventoryModule(BaseInventoryPlugin, Constructable):
                 interfaces = server["Interfaces"]
                 self.inventory.set_variable(hostname, "ip_address", [x.get("IPAddress") for x in interfaces])
                 self.inventory.set_variable(hostname, "user_ip_address", [x.get("UserIPAddress") for x in interfaces])
+                self.inventory.set_variable(hostname, "zone", zone)
 
                 # add to group based on tags
                 for tag in server["Tags"]:
