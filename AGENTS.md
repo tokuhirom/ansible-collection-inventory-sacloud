@@ -16,6 +16,8 @@ This is an Ansible Collection that provides a dynamic inventory plugin for Sakur
 ├── AGENTS.md                # This file
 ├── pyproject.toml           # Python project configuration (ruff, Python 3.13+)
 ├── .tagpr                   # tagpr configuration file
+├── scripts/
+│   └── update-version.sh    # Version update script (called by tagpr)
 ├── .github/
 │   ├── workflows/
 │   │   ├── ci.yml          # GitHub Actions CI (lint tests)
@@ -165,12 +167,15 @@ The collection is defined in `galaxy.yml`:
 
 3. **tagpr automatically creates a release PR**
    - The tagpr workflow detects the version change
+   - Runs `scripts/update-version.sh` to update:
+     - `galaxy.yml` version
+     - `README.md` download URL with new version
    - Creates a PR titled "Release v0.0.6" (or similar)
    - Generates changelog from commit messages
-   - PR includes all changes since last release
+   - PR includes all version updates and changes since last release
 
 4. **Review and merge the release PR**
-   - Review the changelog and changes
+   - Review the changelog and version updates
    - Merge the PR (can use auto-merge if configured)
 
 5. **Tag and release are created automatically**

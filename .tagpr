@@ -11,8 +11,9 @@
   # Changelog file (optional)
   changelog = true
 
-  # Release command to run after tag is created
-  command = "make build"
+  # Command to update version in files
+  # This is called with the new version as argument
+  command = "bash scripts/update-version.sh"
 
   # Release branch (default: main)
   releaseBranch = "main"
