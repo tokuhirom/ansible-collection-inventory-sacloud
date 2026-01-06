@@ -9,6 +9,7 @@ on:
 
 permissions:
   contents: write
+  pull-requests: write
 
 jobs:
   release:
@@ -29,11 +30,16 @@ jobs:
           curl -LsSf https://astral.sh/uv/install.sh | sh
           echo "$HOME/.cargo/bin" >> $GITHUB_PATH
       
-      - name: Update version in galaxy.yml and README.md
+      - name: Create version bump PR
+        id: create-pr
         run: |
           # Remove 'v' prefix for version in galaxy.yml
           WITH_V="${{ github.event.inputs.version }}"
           WITHOUT_V="${WITH_V#v}"
+          BRANCH_NAME="release-${WITH_V}"
+
+          # Create and checkout new branch
+          git checkout -b "$BRANCH_NAME"
 
           # Update galaxy.yml
           sed -i.bak "s/version: .*/version: \"$WITHOUT_V\"/" galaxy.yml
@@ -43,11 +49,55 @@ jobs:
           sed -i.bak "s|releases/download/v[0-9]*\.[0-9]*\.[0-9]*/tokuhirom-sacloud-[0-9]*\.[0-9]*\.[0-9]*\.tar\.gz|releases/download/${WITH_V}/tokuhirom-sacloud-${WITHOUT_V}.tar.gz|" README.md
           rm README.md.bak
 
+          # Commit and push
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add galaxy.yml README.md
           git commit -m "Bump version to $WITHOUT_V"
-          git push origin main
+          git push origin "$BRANCH_NAME"
+
+          # Create PR with auto-merge
+          PR_URL=$(gh pr create \
+            --title "Release ${WITH_V}: Bump version to ${WITHOUT_V}" \
+            --body "Automated version bump for release ${WITH_V}" \
+            --base main \
+            --head "$BRANCH_NAME")
+
+          echo "pr_url=$PR_URL" >> $GITHUB_OUTPUT
+
+          # Enable auto-merge
+          gh pr merge "$PR_URL" --auto --squash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Wait for PR to merge
+        run: |
+          PR_URL="${{ steps.create-pr.outputs.pr_url }}"
+          echo "Waiting for PR to merge: $PR_URL"
+
+          # Wait up to 5 minutes for PR to merge
+          for i in {1..60}; do
+            STATE=$(gh pr view "$PR_URL" --json state --jq .state)
+            if [ "$STATE" = "MERGED" ]; then
+              echo "PR merged successfully"
+              break
+            fi
+            echo "PR state: $STATE, waiting... ($i/60)"
+            sleep 5
+          done
+
+          # Check final state
+          FINAL_STATE=$(gh pr view "$PR_URL" --json state --jq .state)
+          if [ "$FINAL_STATE" != "MERGED" ]; then
+            echo "Error: PR was not merged within timeout"
+            exit 1
+          fi
+
+          # Fetch latest main after merge
+          git checkout main
+          git pull origin main
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       
       - name: Create tag and release
         uses: softprops/action-gh-release@de2c0eb89ae2a093876385947365aca7b0e5f844 # v1
