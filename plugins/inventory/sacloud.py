@@ -65,7 +65,7 @@ compose:
 
 def get_sacloud_servers(api_root: str, zone: str, token: str, token_secret: str):
     q = r"""{"From":0,"To":0,"Sort":["Name"]}"""
-    url = f"{api_root}/{zone}/api/cloud/1.1/server?" + quote(q, safe='')
+    url = f"{api_root}/{zone}/api/cloud/1.1/server?" + quote(q, safe="")
     response = open_url(url, url_username=token, url_password=token_secret)
     data = response.read()
 
