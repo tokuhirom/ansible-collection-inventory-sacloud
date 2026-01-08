@@ -14,7 +14,7 @@ requirements.yml に以下のように記述します｡
 
 ```yaml
 collections:
-  - name: https://github.com/tokuhirom/ansible-collection-inventory-sacloud/releases/download/v0.0.6/tokuhirom-sacloud-0.0.6.tar.gz
+  - name: https://github.com/tokuhirom/ansible-collection-inventory-sacloud/releases/download/v0.0.7/tokuhirom-sacloud-0.0.7.tar.gz
 ```
 
 以下のコマンドを実行してインストールします｡
