@@ -1,4 +1,5 @@
 import json
+from urllib.parse import quote
 
 from ansible.module_utils.urls import open_url
 from ansible.plugins.inventory import BaseInventoryPlugin, Constructable
@@ -63,7 +64,8 @@ compose:
 
 
 def get_sacloud_servers(api_root: str, zone: str, token: str, token_secret: str):
-    url = f"{api_root}/{zone}/api/cloud/1.1/server?" + "{From:0,To:0}"
+    q = r"""{"From":0,"To":0,"Sort":["Name"]}"""
+    url = f"{api_root}/{zone}/api/cloud/1.1/server?" + quote(q, safe="")
     response = open_url(url, url_username=token, url_password=token_secret)
     data = response.read()
 
