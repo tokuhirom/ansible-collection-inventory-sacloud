@@ -1,5 +1,8 @@
 # Changelog
 
+## [v0.0.7](https://github.com/tokuhirom/ansible-collection-inventory-sacloud/compare/v0.0.6...v0.0.7) - 2026-01-08
+- feat: sort servers by server name by @tokuhirom in https://github.com/tokuhirom/ansible-collection-inventory-sacloud/pull/12
+
 ## [v0.0.6](https://github.com/tokuhirom/ansible-collection-inventory-sacloud/compare/v0.0.5...v0.0.6) - 2026-01-06
 - Improve README installation and usage instructions by @tokuhirom in https://github.com/tokuhirom/ansible-collection-inventory-sacloud/pull/3
 - Add detailed configuration options documentation by @tokuhirom in https://github.com/tokuhirom/ansible-collection-inventory-sacloud/pull/4
